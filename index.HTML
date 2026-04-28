@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Frenos Dulanto Pro</title>
+    
+    <!-- Configuración PWA / App Nativa -->
+    <meta name="theme-color" content="#84cc16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Frenos Dulanto">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/806/806042.png">
+    
+    <!-- Manifest dinámico para instalación -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJlcyIsCiAgIm5hbWUiOiAiRnJlbm9zIER1bGFudG8gUHJvIiwKICAic2hvcnRfbmFtZSI6ICJGcmVub3MgRHVsYW50byIsCiAgImRlc2NyaXB0aW9uIjogIlNpc3RlbWEgZGUgZ2VzdGnDs24gZGUgYm9sZXRhcyB5IHByb2Zvcm1hcyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjhmYWZjIiwKICAidGhlbWVfY29sb3IiOiAiIzg0Y2MxNiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzgwNi84MDYwNDIucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar-scroll {
+                height: calc(100vh - 120px);
+                overflow-y: auto;
+                padding-right: 12px;
+            }
+            .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+            .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-out;
+            opacity: 0;
+        }
+
+        .accordion-content.open {
+            max-height: 2000px;
+            opacity: 1;
+            padding-top: 1rem;
+        }
+
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .chevron-icon.rotate {
+            transform: rotate(180deg);
+        }
+
+        .document-page {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 297mm;
+            width: 210mm;
+            padding: 15mm;
+            margin: 0 auto;
+            position: relative;
+            border: 1px solid #e2e8f0;
+            transform-origin: top center;
+            overflow: hidden;
+        }
+
+        .watermark-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(var(--wm-rotate, 0deg));
+            opacity: var(--wm-opacity, 0.1);
+            pointer-events: none;
+            width: 70%;
+            z-index: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .watermark-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 1023px) {
+            #preview-section { display: none; }
+        }
+
+        @media (min-width: 1024px) {
+            .preview-scale-wrapper {
+                transform: scale(0.85);
+                transform-origin: top center;
+            }
+        }
+
+        #mobile-preview-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        #mobile-preview-modal.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content-scroll {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-scale-wrapper {
+            transform: scale(0.42);
+            transform-origin: top center;
+            margin-bottom: -160mm;
+        }
+        
+        @media (min-width: 450px) and (max-width: 1023px) {
+            .modal-scale-wrapper {
+                transform: scale(0.6);
+                margin-bottom: -110mm;
+            }
+        }
+
+        .header-lime { background-color: #84cc16 !important; color: #ffffff !important; }
+        .text-lime-brand { color: #84cc16 !important; }
+        .totals-bg { background-color: #84cc16 !important; color: #ffffff !important; }
+
+        .form-input {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            border-color: #84cc16;
+            box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.1);
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #e2e8f0;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            background-color: #ffffff !important;
+        }
+        
+        .payment-pill.active {
+            border-color: #84cc16 !important;
+            background-color: #f7fee7 !important;
+            color: #3f6212 !important;
+        }
+
+        #print-container { display: none; }
+
+        @media print {
+            @page { size: A4; margin: 0; }
+            body * { visibility: hidden; }
+            #print-container, #print-container * { visibility: visible; }
+            #print-container {
+                display: block !important;
+                position: absolute;
+                left: 0; top: 0;
+                width: 210mm; height: 297mm;
+                background: white !important;
+            }
+            .document-page {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                transform: scale(1) !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 15mm !important;
+            }
+            .header-lime, .totals-bg {
+                background-color: #84cc16 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color: white !important;
+            }
+            .text-lime-brand {
+                color: #84cc16 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        .force-wrap {
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+            white-space: normal !important;
+            display: block;
+            width: 100%;
+        }
+
+        /* Estilo Botón Instalar */
+        #install-btn {
+            display: none;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+    </style>
+</head>
+<body class="pb-24 lg:pb-0">
+
+    <div id="print-container"></div>
+
+    <!-- Mobile Preview Modal -->
+    <div id="mobile-preview-modal">
+        <div class="flex items-center justify-between p-4 bg-slate-900 text-white">
+            <span class="font-bold text-xs uppercase tracking-widest">Vista Previa A4</span>
+            <button onclick="toggleModal(false)" class="p-2 bg-white/10 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-content-scroll">
+            <div class="modal-scale-wrapper" id="modal-document-target"></div>
+        </div>
+        <div class="p-4 bg-slate-900/80 backdrop-blur">
+             <button onclick="window.print()" class="w-full bg-lime-500 text-slate-900 font-black py-4 rounded-xl flex items-center justify-center gap-3 uppercase text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Imprimir Documento
+             </button>
+        </div>
+    </div>
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-sm font-extrabold text-slate-900 leading-none">Frenos Dulanto</h1>
+                    <span class="text-[10px] font-bold text-lime-600 uppercase tracking-tighter">APP INSTALABLE</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="hidden sm:flex bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold items-center gap-2 hover:bg-black transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Imprimir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-0 lg:px-4 py-4 lg:py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <aside id="editor-section" class="lg:col-span-4 space-y-4 px-4 lg:px-0 sidebar-scroll">
+                
+                <!-- Botón Instalar App (Solo móvil si es compatible) -->
+                <button id="install-btn" class="w-full py-4 bg-lime-500 text-slate-900 text-[11px] font-black uppercase rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-lime-200 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Instalar App en el Celular
+                </button>
+
+                <button onclick="clearSpecificData()" class="w-full py-4 bg-white border-2 border-dashed border-slate-200 text-slate-500 text-[11px] font-black uppercase rounded-2xl hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    Limpiar Cliente e Ítems
+                </button>
+
+                <!-- Document Settings -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('sec-doc', 'chev-doc')" class="w-full flex items-center justify-between p-4 text-left">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-slate-900 rounded-full"></span> Documento
+                        </span>
+                        <svg id="chev-doc" class="chevron-icon rotate w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div id="sec-doc" class="accordion-content open px-4 pb-4 space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Tipo</label>
+                                <select id="form-tipo" onchange="sync()" class="form-input">
+                                    <option value="BOLETA DE VENTA" selected>BOLETA</option>
+                                    <option value="PROFORMA">PROFORMA</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Fecha</label>
+                                <input type="date" id="form-fecha" onchange="sync()" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marca de Agua -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('sec-wm', 'chev-wm')" class="w-full flex items-center justify-between p-4 text-left">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-blue-500 rounded-full"></span> Marca de Agua
+                        </span>
+                        <svg id="chev-wm" class="chevron-icon w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div id="sec-wm" class="accordion-content px-4 pb-4 space-y-4">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Subir Imagen</label>
+                            <input type="file" id="wm-file" accept="image/*" onchange="handleWatermark(this)" class="text-[10px] block w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Opacidad (<span id="wm-opacity-val">0.1</span>)</label>
+                                <input type="range" id="wm-opacity" min="0" max="1" step="0.05" value="0.1" oninput="updateWMStyles()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Ángulo (<span id="wm-rotate-val">0</span>°)</label>
+                                <input type="range" id="wm-rotate" min="-180" max="180" step="1" value="0" oninput="updateWMStyles()" class="w-full accent-blue-600">
+                            </div>
+                        </div>
+                        <button onclick="resetWatermark()" class="w-full text-[9px] font-bold text-red-500 uppercase py-1 border border-red-100 rounded-lg hover:bg-red-50">Eliminar Marca</button>
+                    </div>
+                </div>
+
+                <!-- Client Info -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('sec-cli', 'chev-cli')" class="w-full flex items-center justify-between p-4 text-left">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-lime-500 rounded-full"></span> Cliente
+                        </span>
+                        <svg id="chev-cli" class="chevron-icon rotate w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div id="sec-cli" class="accordion-content open px-4 pb-4 space-y-3">
+                        <input type="text" id="form-cliente" oninput="sync()" class="form-input" placeholder="Nombre / Empresa">
+                        <input type="text" id="form-cliente-id" oninput="sync()" class="form-input" placeholder="DNI / RUC">
+                    </div>
+                </div>
+
+                <!-- Item Entry -->
+                <div class="bg-lime-50 rounded-2xl border border-lime-100 shadow-sm p-4">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1.5 h-4 bg-lime-500 rounded-full"></div>
+                        <h3 class="text-[11px] font-bold text-lime-700 uppercase">Añadir Servicio</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[9px] font-bold text-lime-600 uppercase mb-1 block">Descripción</label>
+                            <textarea id="item-desc" placeholder="Ej: Rectificado de discos..." class="form-input resize-none" rows="2"></textarea>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="col-span-1">
+                                <label class="text-[9px] font-bold text-lime-600 uppercase mb-1 block">Cant.</label>
+                                <select id="item-qty" class="form-input h-[42px]"></select>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="text-[9px] font-bold text-lime-600 uppercase mb-1 block">P. Unitario</label>
+                                <input type="number" id="item-price" placeholder="0.00" class="form-input h-[42px]">
+                            </div>
+                        </div>
+                        <button onclick="addItem()" class="w-full bg-lime-600 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-lime-200 active:scale-95 transition-all">
+                            AGREGAR ÍTEM
+                        </button>
+                    </div>
+                </div>
+
+                <div id="sidebar-items-container" class="space-y-2"></div>
+
+                <!-- Payment Methods -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+                    <h3 class="text-[11px] font-bold text-slate-500 uppercase mb-3">Formas de Pago</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg cursor-pointer">
+                            <input type="checkbox" id="pay-cash" checked onchange="sync()" class="accent-lime-600">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Efectivo</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg cursor-pointer">
+                            <input type="checkbox" id="pay-yape" checked onchange="sync()" class="accent-lime-600">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Yape</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg cursor-pointer">
+                            <input type="checkbox" id="pay-bank" checked onchange="sync()" class="accent-lime-600">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Tranferencia</span>
+                        </label>
+                        <label class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg cursor-pointer">
+                            <input type="checkbox" id="pay-card" onchange="sync()" class="accent-lime-600">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Tarjeta</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Configuración Emisor -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('sec-emi', 'chev-emi')" class="w-full flex items-center justify-between p-4 text-left">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-slate-400 rounded-full"></span> Emisor
+                        </span>
+                        <svg id="chev-emi" class="chevron-icon w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <div id="sec-emi" class="accordion-content px-4 pb-4 space-y-2">
+                        <input type="text" id="form-empresa-nombre" oninput="sync()" class="form-input font-bold" value="Frenos Industriales y Automotriz Dulanto E.I.R.L.">
+                        <input type="text" id="form-empresa-ruc" oninput="sync()" class="form-input" value="20611129735">
+                        <input type="text" id="form-empresa-dir" oninput="sync()" class="form-input" value="JR. SÁENZ PEÑA 256 - LA VICTORIA">
+                        <input type="text" id="form-empresa-cel" oninput="sync()" class="form-input" value="Celular: 947429347">
+                        <input type="text" id="form-empresa-mail" oninput="sync()" class="form-input" value="Tiktok: @frenos.dulanto">
+                        <input type="text" id="form-empresa-web" oninput="sync()" class="form-input text-lime-600" value="www.frenosdulanto.com">
+                    </div>
+                </div>
+
+                <!-- IGV Config -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                    <label class="text-[11px] font-bold text-slate-800 uppercase block">IGV (18%)</label>
+                    <select id="tax-mode" onchange="sync()" class="form-input bg-slate-50 font-bold text-slate-700">
+                        <option value="none">SIN IGV</option>
+                        <option value="included" selected>INCLUYE IGV</option>
+                        <option value="added">MÁS IGV</option>
+                    </select>
+                </div>
+
+                <!-- Botones Móvil -->
+                <div class="lg:hidden grid grid-cols-2 gap-3 pt-4 pb-12">
+                    <button onclick="toggleModal(true)" class="bg-white border-2 border-slate-900 text-slate-900 px-4 py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Vista Previa
+                    </button>
+                    <button onclick="window.print()" class="bg-slate-900 text-white px-4 py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Imprimir
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Preview Desktop -->
+            <main id="preview-section" class="lg:col-span-8 sticky top-24 pb-20">
+                <div class="preview-scale-wrapper" id="desktop-preview-container"></div>
+            </main>
+        </div>
+    </main>
+
+    <!-- Document Template -->
+    <template id="document-template">
+        <div class="document-page">
+            <div class="watermark-overlay tpl-wm-container"></div>
+            <div class="flex justify-between items-start mb-8 relative z-10">
+                <div class="max-w-[65%]">
+                    <h2 class="tpl-emp-name text-2xl font-black text-slate-900 uppercase leading-tight mb-1"></h2>
+                    <div class="text-[12px] text-slate-500 font-medium uppercase leading-tight space-y-0.5">
+                        <p class="tpl-emp-dir"></p>
+                        <p class="tpl-emp-contact"></p>
+                        <p class="tpl-emp-web font-bold text-lime-600 lowercase"></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <h1 class="tpl-tipo text-lime-brand text-4xl font-black uppercase mb-1"></h1>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[2px]">R.U.C. EMISOR</p>
+                    <p class="tpl-emp-ruc text-sm font-black text-slate-800"></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-4 mb-6 border-y border-slate-100 py-4 items-center relative z-10">
+                <div class="col-span-6 border-r border-slate-50 pr-4">
+                    <p class="info-label">Cliente</p>
+                    <p class="tpl-cli-name text-[13px] font-bold text-slate-800 uppercase break-words"></p>
+                </div>
+                <div class="col-span-3 border-r border-slate-50 px-2">
+                    <p class="info-label">DNI / RUC</p>
+                    <p class="tpl-cli-id text-[13px] font-bold text-slate-700"></p>
+                </div>
+                <div class="col-span-3 text-right pl-2">
+                    <p class="info-label">Fecha</p>
+                    <p class="tpl-fecha text-[13px] font-bold text-slate-800"></p>
+                </div>
+            </div>
+            <div class="flex-grow flex flex-col relative z-10">
+                <table class="w-full table-fixed border-collapse">
+                    <thead>
+                        <tr class="text-[12px] font-black uppercase tracking-[2px]">
+                            <th class="header-lime py-3 px-1 text-center w-[8%]">N°</th>
+                            <th class="header-lime py-3 px-4 text-left w-[52%]">Descripción</th>
+                            <th class="header-lime py-3 px-2 text-right w-[15%]">P. Unit</th>
+                            <th class="header-lime py-3 px-1 text-center w-[10%]">Cant.</th>
+                            <th class="header-lime py-3 px-4 text-right w-[15%]">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tpl-items-body text-[11px] font-medium text-slate-700"></tbody>
+                </table>
+                <div class="tpl-empty py-24 text-center">
+                    <p class="text-[11px] font-bold text-slate-200 uppercase tracking-widest italic italic">Complete datos para generar</p>
+                </div>
+            </div>
+            <div class="tpl-totals mt-auto pt-6 relative z-10">
+                <div class="flex items-end justify-between border-t border-slate-900 pt-4">
+                    <div class="w-1/2">
+                        <p class="info-label mb-2">Formas de Pago</p>
+                        <div class="flex flex-wrap gap-1.5 tpl-payments-container"></div>
+                    </div>
+                    <div class="w-1/2">
+                        <table class="w-full">
+                            <tbody class="text-xs">
+                                <tr class="tpl-sub-row border-b border-slate-50">
+                                    <td class="py-1 px-4 text-right font-bold text-slate-400 uppercase text-[12px]">Sub Total</td>
+                                    <td class="py-1 px-4 text-right font-bold text-slate-800 w-32">S/ <span class="tpl-sub">0.00</span></td>
+                                </tr>
+                                <tr class="tpl-tax-row border-b border-slate-50">
+                                    <td class="py-1 px-4 text-right font-bold text-slate-400 uppercase text-[12px]">I.G.V. (18%)</td>
+                                    <td class="py-1 px-4 text-right font-bold text-slate-800 w-32">S/ <span class="tpl-tax">0.00</span></td>
+                                </tr>
+                                <tr class="totals-bg">
+                                    <td class="py-4 px-5 text-right font-black uppercase text-[13px] tracking-widest border-r border-white/10">Total Neto</td>
+                                    <td class="py-4 px-5 text-right font-black text-2xl w-44">S/ <span class="tpl-grand">0.00</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 text-[12px] text-slate-300 font-bold uppercase tracking-[4px] text-center">
+                    Frenos Dulanto - SEGURIDAD Y GARANTIA
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // --- LOGICA PWA (Sin alterar código original) ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Registrar Service Worker Inline (Requisito instalabilidad)
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+
+        // --- LÓGICA ORIGINAL ---
+        let items = [];
+        let watermarkImage = null;
+        const STORAGE_KEY = 'frenos_dulanto_data';
+
+        window.onload = () => {
+            const qtySelect = document.getElementById('item-qty');
+            for (let i = 1; i <= 50; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.textContent = i;
+                qtySelect.appendChild(opt);
+            }
+            
+            loadSavedData();
+            if(!document.getElementById('form-fecha').value) {
+                document.getElementById('form-fecha').valueAsDate = new Date();
+            }
+            sync();
+        };
+
+        function toggleAccordion(id, chevId) {
+            const content = document.getElementById(id);
+            const chevron = document.getElementById(chevId);
+            content.classList.toggle('open');
+            chevron.classList.toggle('rotate');
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('mobile-preview-modal');
+            if(show) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                sync();
+            } else {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleWatermark(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    watermarkImage = e.target.result;
+                    sync();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function resetWatermark() {
+            watermarkImage = null;
+            document.getElementById('wm-file').value = "";
+            sync();
+        }
+
+        function updateWMStyles() {
+            const opacity = document.getElementById('wm-opacity').value;
+            const rotate = document.getElementById('wm-rotate').value;
+            document.getElementById('wm-opacity-val').textContent = opacity;
+            document.getElementById('wm-rotate-val').textContent = rotate;
+            sync();
+        }
+
+        function addItem() {
+            const desc = document.getElementById('item-desc'), 
+                  qty = document.getElementById('item-qty'), 
+                  price = document.getElementById('item-price');
+            
+            if (!desc.value || !price.value) return;
+            
+            items.push({
+                id: Date.now(),
+                desc: desc.value,
+                qty: parseFloat(qty.value),
+                price: parseFloat(price.value)
+            });
+            
+            desc.value = '';
+            price.value = '';
+            sync();
+        }
+
+        function removeItem(id) {
+            items = items.filter(i => i.id !== id);
+            sync();
+        }
+
+        function clearSpecificData() {
+            if (confirm("¿Borrar datos del cliente e ítems?")) {
+                document.getElementById('form-cliente').value = '';
+                document.getElementById('form-cliente-id').value = '';
+                document.getElementById('form-fecha').valueAsDate = new Date();
+                items = [];
+                saveCurrentData();
+                sync();
+            }
+        }
+
+        function saveCurrentData() {
+            const dataToSave = {
+                form: {
+                    tipo: document.getElementById('form-tipo').value,
+                    fecha: document.getElementById('form-fecha').value,
+                    cliente: document.getElementById('form-cliente').value,
+                    clienteId: document.getElementById('form-cliente-id').value,
+                    empName: document.getElementById('form-empresa-nombre').value,
+                    empRuc: document.getElementById('form-empresa-ruc').value,
+                    empDir: document.getElementById('form-empresa-dir').value,
+                    empCel: document.getElementById('form-empresa-cel').value,
+                    empMail: document.getElementById('form-empresa-mail').value,
+                    empWeb: document.getElementById('form-empresa-web').value,
+                    payYape: document.getElementById('pay-yape').checked,
+                    payCash: document.getElementById('pay-cash').checked,
+                    payCard: document.getElementById('pay-card').checked,
+                    payBank: document.getElementById('pay-bank').checked,
+                    taxMode: document.getElementById('tax-mode').value,
+                    wmOpacity: document.getElementById('wm-opacity').value,
+                    wmRotate: document.getElementById('wm-rotate').value,
+                    wmImg: watermarkImage
+                },
+                items: items
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        }
+
+        function loadSavedData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                if (data.form) {
+                    document.getElementById('form-tipo').value = data.form.tipo || 'BOLETA DE VENTA';
+                    document.getElementById('form-fecha').value = data.form.fecha || '';
+                    document.getElementById('form-cliente').value = data.form.cliente || '';
+                    document.getElementById('form-cliente-id').value = data.form.clienteId || '';
+                    document.getElementById('form-empresa-nombre').value = data.form.empName || 'Frenos Industriales y Automotriz Dulanto E.I.R.L.';
+                    document.getElementById('form-empresa-ruc').value = data.form.empRuc || '20611129735';
+                    document.getElementById('form-empresa-dir').value = data.form.empDir || 'JR. SÁENZ PEÑA 256 - LA VICTORIA';
+                    document.getElementById('form-empresa-cel').value = data.form.empCel || 'Celular: 947429347';
+                    document.getElementById('form-empresa-mail').value = data.form.empMail || 'Tiktok: @frenos.dulanto';
+                    document.getElementById('form-empresa-web').value = data.form.empWeb || 'www.frenosdulanto.com';
+                    document.getElementById('pay-yape').checked = data.form.payYape;
+                    document.getElementById('pay-cash').checked = data.form.payCash;
+                    document.getElementById('pay-card').checked = data.form.payCard;
+                    document.getElementById('pay-bank').checked = data.form.payBank;
+                    document.getElementById('tax-mode').value = data.form.taxMode || 'included';
+                    document.getElementById('wm-opacity').value = data.form.wmOpacity || 0.1;
+                    document.getElementById('wm-rotate').value = data.form.wmRotate || 0;
+                    watermarkImage = data.form.wmImg || null;
+                }
+                items = data.items || [];
+            } catch(e) {}
+        }
+
+        function sync() {
+            const rawFecha = document.getElementById('form-fecha').value;
+            const data = {
+                empName: document.getElementById('form-empresa-nombre').value,
+                empRuc: document.getElementById('form-empresa-ruc').value,
+                empDir: document.getElementById('form-empresa-dir').value,
+                empCel: document.getElementById('form-empresa-cel').value,
+                empMail: document.getElementById('form-empresa-mail').value,
+                empWeb: document.getElementById('form-empresa-web').value,
+                tipo: document.getElementById('form-tipo').value,
+                fecha: rawFecha ? rawFecha.split('-').reverse().join('/') : '---',
+                cliName: document.getElementById('form-cliente').value || '---',
+                cliId: document.getElementById('form-cliente-id').value || '---',
+                payments: {
+                    yape: document.getElementById('pay-yape').checked,
+                    cash: document.getElementById('pay-cash').checked,
+                    card: document.getElementById('pay-card').checked,
+                    bank: document.getElementById('pay-bank').checked
+                },
+                taxMode: document.getElementById('tax-mode').value,
+                wmSettings: {
+                    img: watermarkImage,
+                    opacity: document.getElementById('wm-opacity').value,
+                    rotate: document.getElementById('wm-rotate').value
+                }
+            };
+
+            const desktopPreview = document.getElementById('desktop-preview-container');
+            if(desktopPreview) { desktopPreview.innerHTML = ''; desktopPreview.appendChild(generateDoc(data)); }
+
+            const modalPreview = document.getElementById('modal-document-target');
+            if(modalPreview) { modalPreview.innerHTML = ''; modalPreview.appendChild(generateDoc(data)); }
+
+            const printContainer = document.getElementById('print-container');
+            printContainer.innerHTML = ''; printContainer.appendChild(generateDoc(data));
+            
+            renderSidebarItems();
+            saveCurrentData();
+        }
+
+        function generateDoc(data) {
+            const template = document.getElementById('document-template').content.cloneNode(true);
+            template.querySelector('.tpl-emp-name').textContent = data.empName;
+            template.querySelector('.tpl-emp-ruc').textContent = data.empRuc;
+            template.querySelector('.tpl-emp-dir').textContent = data.empDir;
+            template.querySelector('.tpl-emp-contact').textContent = `${data.empCel} | ${data.empMail}`;
+            template.querySelector('.tpl-emp-web').textContent = data.empWeb;
+            template.querySelector('.tpl-tipo').textContent = data.tipo;
+            template.querySelector('.tpl-fecha').textContent = data.fecha;
+            template.querySelector('.tpl-cli-name').textContent = data.cliName;
+            template.querySelector('.tpl-cli-id').textContent = data.cliId;
+
+            const wmContainer = template.querySelector('.tpl-wm-container');
+            if (data.wmSettings.img) {
+                wmContainer.style.setProperty('--wm-opacity', data.wmSettings.opacity);
+                wmContainer.style.setProperty('--wm-rotate', `${data.wmSettings.rotate}deg`);
+                wmContainer.innerHTML = `<img src="${data.wmSettings.img}" alt="Watermark">`;
+            }
+
+            const tbody = template.querySelector('.tpl-items-body');
+            const empty = template.querySelector('.tpl-empty');
+            let sumBase = 0;
+            
+            if (items.length > 0) {
+                empty.style.display = 'none';
+                items.forEach((item, idx) => {
+                    const rowTotalRaw = item.qty * item.price;
+                    sumBase += rowTotalRaw;
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-100 align-top";
+                    tr.innerHTML = `
+                        <td class="py-4 px-1 text-center text-slate-400 font-bold">${idx + 1}</td>
+                        <td class="py-4 px-4 uppercase font-bold text-slate-800 leading-snug"><span class="force-wrap">${item.desc}</span></td>
+                        <td class="py-4 px-2 text-right font-medium">S/ ${item.price.toFixed(2)}</td>
+                        <td class="py-4 px-1 text-center font-black">${item.qty}</td>
+                        <td class="py-4 px-4 text-right font-black text-slate-900">S/ ${rowTotalRaw.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            let subtotal, tax, grandTotal;
+            if (data.taxMode === 'included') {
+                grandTotal = sumBase; subtotal = grandTotal / 1.18; tax = grandTotal - subtotal;
+            } else if (data.taxMode === 'added') {
+                subtotal = sumBase; tax = subtotal * 0.18; grandTotal = subtotal + tax;
+            } else {
+                subtotal = sumBase; tax = 0; grandTotal = sumBase;
+            }
+            
+            template.querySelector('.tpl-sub-row').style.display = (data.taxMode !== 'none') ? 'table-row' : 'none';
+            template.querySelector('.tpl-tax-row').style.display = (data.taxMode !== 'none') ? 'table-row' : 'none';
+            template.querySelector('.tpl-sub').textContent = subtotal.toFixed(2);
+            template.querySelector('.tpl-tax').textContent = tax.toFixed(2);
+            template.querySelector('.tpl-grand').textContent = grandTotal.toFixed(2);
+
+            const payContainer = template.querySelector('.tpl-payments-container');
+            const pMap = [{id: 'yape', label: 'Yape'}, {id: 'cash', label: 'Efectivo'}, {id: 'card', label: 'Tarjeta'}, {id: 'bank', label: 'Banco'}];
+            pMap.forEach(p => {
+                if (data.payments[p.id]) {
+                    const pill = document.createElement('div');
+                    pill.className = 'payment-pill active';
+                    pill.innerHTML = `<span>${p.label}</span>`;
+                    payContainer.appendChild(pill);
+                }
+            });
+            return template;
+        }
+
+        function renderSidebarItems() {
+            const container = document.getElementById('sidebar-items-container');
+            container.innerHTML = '';
+            items.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm';
+                div.innerHTML = `
+                    <div class="flex-grow truncate mr-3">
+                        <p class="text-[10px] font-black text-slate-900 uppercase truncate">${i.desc}</p>
+                        <p class="text-[9px] text-slate-400 font-bold">CANT: ${i.qty} • S/ ${i.price.toFixed(2)}</p>
+                    </div>
+                    <button onclick="removeItem(${i.id})" class="w-8 h-8 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
